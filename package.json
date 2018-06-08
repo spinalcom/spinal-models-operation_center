@@ -2,7 +2,7 @@
   "name": "spinal-models-operation_center",
   "version": "1.0.0",
   "description": "",
-  "main": "src/OperationCenter.js",
+  "main": "build/OperationCenter.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/spinalcom/spinal-models-operation_center.git"

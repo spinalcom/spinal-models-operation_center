@@ -44,7 +44,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 // along with Soda. If not, see <http://www.gnu.org/licenses/>.
 
 var spinalCore = require("spinal-core-connectorjs");
-var _exports = module.exports = {};
 var globalType = typeof window === "undefined" ? global : window;
 var getViewer = function getViewer() {
   return globalType.v;

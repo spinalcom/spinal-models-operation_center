@@ -15,7 +15,6 @@
 // along with Soda. If not, see <http://www.gnu.org/licenses/>.
 
 const spinalCore = require("spinal-core-connectorjs");
-var exports = (module.exports = {});
 const globalType = typeof window === "undefined" ? global : window;
 let getViewer = function() {
   return globalType.v;
@@ -43,6 +42,7 @@ class OperationCenter extends globalType.Model {
     });
   }
 }
+
 
 
 export {
