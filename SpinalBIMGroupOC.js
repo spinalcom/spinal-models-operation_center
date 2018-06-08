@@ -2,7 +2,7 @@ const globalType = typeof window === "undefined" ? global : window;
 const spinalCore = require("spinal-core-connectorjs");
 const BIMForge = require("spinal-models-bim_forge");
 import SpinalBIMObjectOC from "./SpinalBIMObjectOC"
-import colors from "../assets/utilities/colors"
+import colors from "./assets/utilities/colors"
 
 
 let getViewer = function() {
