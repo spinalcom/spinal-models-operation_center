@@ -1,37 +1,43 @@
 const spinalCore = require("spinal-core-connectorjs");
 const globalType = typeof window === "undefined" ? global : window;
-import {
-  ConfigurationRoot
-} from "./ConfigurationNode"
+import ConfigurationNode from "./ConfigurationNode"
 let getViewer = function() {
   return globalType.v;
 }
 export default class Forest extends globalType.Model {
-  constructor() {
+  constructor(_options) {
+    if (typeof _options === "undefined") _options = new globalType.Model()
     super();
     if (FileSystem._sig_server) {
       this.add_attr({
         list: new Lst(),
-        id: 0,
-        coloringType: 0
+        childNameId: 0,
+        coloringType: 0,
+        relOptions: _options
       });
     }
   }
 
-  incrementId() {
-    this.id.set(this.id.get() + 1);
-    return this.id.get();
+  incrementChildNameId() {
+    this.childNameId.set(this.childNameId.get() + 1);
+    return this.childNameId.get();
   }
 
   addTree(title) {
-    var tree = new ConfigurationRoot();
-    tree.setTitle(title + " " + this.incrementId().toString());
+    var tree = new ConfigurationNode(0, "Zone", this.relOptions);
+    let id = this.incrementChildNameId()
+    tree.setTitle(title + " " + id.toString());
+
     this.list.push(tree);
   }
 
   removeTree(root) {
-    this.list.remove(root);
-    delete FileSystem._objects[root._server_id];
+    let i = this.list.indexOf(root);
+    if (i >= 0) {
+      this.list.splice(i, 1);
+      delete FileSystem._objects[root._server_id];
+    }
+    return i;
   }
 
   getEquipements() {
@@ -76,6 +82,22 @@ export default class Forest extends globalType.Model {
       if (element.currentValue.get() !== 0 && element.display.get()) {
         element.refreshColors(this.coloringType);
       }
+    }
+  }
+
+  activateAllBIMGroups() {
+    let t = this.getAllBIMGroups()
+    for (let index = 0; index < t.length; index++) {
+      const element = t[index];
+      element.active.set(true);
+    }
+  }
+
+  disactivateAllBIMGroups() {
+    let t = this.getAllBIMGroups()
+    for (let index = 0; index < t.length; index++) {
+      const element = t[index];
+      element.active.set(false);
     }
   }
 }

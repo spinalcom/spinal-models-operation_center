@@ -1,50 +1,82 @@
 const spinalCore = require("spinal-core-connectorjs");
 const globalType = typeof window === "undefined" ? global : window;
-import SpinalBIMGroupOC from "./SpinalBIMGroupOC"
+import SpinalBIMGroupOC from "./SpinalBIMGroupOC";
 let getViewer = function() {
   return globalType.v;
-}
+};
 
-export class BasicConfigurationNode extends globalType.Model {
-  constructor() {
+export default class ConfigurationNode extends globalType.Model {
+  constructor(_newParent, _type, _options) {
     super();
     if (FileSystem._sig_server) {
+      if (_newParent === 0)
+        this.add_attr({
+          relOptions: _options
+        });
       this.add_attr({
-        id: 0,
+        id: this.guid(),
         title: "",
-        children: [],
-        display: false,
-        type: "",
+        children: new Lst(),
+        showContent: false,
         BIMGroup: new SpinalBIMGroupOC(this),
-        special: false
+        childNameId: 0,
+        parent: new Ptr(_newParent),
+        type: new Choice(0, ["Zone", "Equipement"])
       });
+      this.type.set(_type || "Zone");
     }
-
-    // console.error("constructor", this.BIMGroup)
   }
 
-  incrementId() {
-    this.id.set(this.id.get() + 1);
-    return this.id.get();
+  //commun for all types
+  incrementChildNameId() {
+    this.childNameId.set(this.childNameId.get() + 1);
+    return this.childNameId.get();
+  }
+
+  guid() {
+    return (
+      this.s4() +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      this.s4() +
+      this.s4()
+    );
+  }
+
+  s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
   }
 
   createChild(_type) {
-    let child = new ConfigurationNode(this);
+    let child = new ConfigurationNode(this, _type);
+
     // console.log("type", _type);
-    if (_type === "zone") {
+    if (_type === "Zone") {
       let parentTitle = this.title.get();
-      child.setTitle(parentTitle + "-" + this.incrementId().toString());
-      child.type.set(_type);
-    } else if (_type === "equip") {
-      child.setTitle("equip" + "-" + this.incrementId().toString());
-      child.type.set(_type);
+      child.setTitle(
+        parentTitle + "-" + this.incrementChildNameId().toString()
+      );
+    } else if (_type === "Equipement") {
+      child.setTitle(
+        "Equipement" + "-" + this.incrementChildNameId().toString()
+      );
     }
     this.addChild(child);
   }
 
-  addChild(child) {
-    this.children.push(child);
-    return child;
+  addChild(child, index) {
+    if (typeof index == "undefined") this.children.push(child);
+    // else
+    //   this.children.push()
   }
 
   addChildren(children) {
@@ -74,13 +106,8 @@ export class BasicConfigurationNode extends globalType.Model {
     else return false;
   }
 
-  isRoot() {
-    if (this.parent) return false;
-    else return true;
-  }
-
   isEquipement() {
-    return this.type.get() === "equip";
+    return this.type.get() === "Equipement";
   }
 
   getEquipements() {
@@ -108,7 +135,7 @@ export class BasicConfigurationNode extends globalType.Model {
   }
 
   test() {
-    console.log(this)
+    console.log(this);
   }
 
   getItems() {
@@ -132,44 +159,96 @@ export class BasicConfigurationNode extends globalType.Model {
       element.display.set(_bool);
     }
   }
-}
 
-
-export class ConfigurationNode extends BasicConfigurationNode {
-  constructor(newParent) {
-    super();
-    this.add_attr({
-      parent: newParent
-    });
+  setAllDatasActive(_bool) {
+    let t = this.getAllBIMGroups();
+    for (let index = 0; index < t.length; index++) {
+      const element = t[index];
+      element.active.set(_bool);
+    }
   }
 
   setParent(parent) {
-    // this.mod_attr("parent", parent);
     this.parent.set(parent);
   }
 
-  getParent() {
-    return this.parent.get();
+  modParent(parent) {
+    if (this.parent.constructor.name === parent.constructor.name)
+      this.parent.set(parent);
+    else {
+      this.mod_attr("parent", parent);
+      // this.mod_attr('parent', parent);
+      // console.log(this.parent.constructor.name);
+    }
   }
 
+  getParent(cb, rej) {
+    this.parent.load(parent => {
+      if (typeof cb != "undefined") cb(parent);
+      else rej(new Error("Parent"))
+    });
+  }
+  getParentAsync() {
+    return new Promise((resolve, reject) => {
+      // console.log(this.parent);
+      this.getParent(resolve, reject);
+    });
+  }
   removeParent() {
-    this.parent.set(null);
+    // this.modParent(new globalType.Ptr(0));
+    this.setParent(0);
   }
 
   remove() {
-    this.parent.children.remove(this);
-    // delete globalType.FileSystem._objects[this._server_id];
+    if (!this.isRoot()) {
+      this.getParent(parent => {
+        parent.children.remove(this);
+        delete globalType.FileSystem._objects[this._server_id];
+      });
+    }
+  }
+
+  isRoot() {
+    return (
+      this.parent.constructor.name === "Ptr" && this.parent.data.value ===
+      0
+    );
+  }
+
+  async getRoot() {
+    if (this.isRoot()) {
+      return new Promise((resolve, reject) => {
+        resolve(this);
+        // reject(new Error("fail"));
+      });
+    } else {
+      try {
+        let rootCandidate = await this.getParentAsync();
+        return new Promise(async function(resolve, reject) {
+          try {
+            // console.log(rootCandidate.title.get());
+            let root = await rootCandidate.getRoot();
+            resolve(root);
+          } catch (error) {
+            console.error(error);
+            reject(new Error("Error"));
+          }
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  updateShowContent(bool) {
+    if (typeof bool != "undefined") {
+      this.showContent.set(bool);
+      return;
+    }
+    if (this.children.length === 0 && this.BIMGroup.BIMObjects.length ===
+      0)
+      this.showContent.set(false);
   }
 }
 
-export class ConfigurationRoot extends BasicConfigurationNode {
-  constructor() {
-    super();
-  }
-}
-
-spinalCore.register_models([
-  BasicConfigurationNode,
-  ConfigurationNode,
-  ConfigurationRoot
-])
+spinalCore.register_models([ConfigurationNode]);

@@ -18,8 +18,8 @@ export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
         currentValue: 0,
         timeSeries: [],
         parent: _parent,
+        active: false
       });
-      this.populateTimeSeries();
       this.display.set(true);
     }
   }
@@ -56,6 +56,8 @@ export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
     return this.arrayOfId().indexOf(itemId) !== -1;
   }
 
+
+
   addItem(itemId) {
     if (!this.contains(itemId)) {
       let newBIMObject = new SpinalBIMObjectOC(itemId, this.id.get());
@@ -67,13 +69,22 @@ export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
 
 
 
-  addItems(input) {
+  addItems(input, index) {
     // input is a list of BIMObjects to add
-    input.forEach(i => {
-      if (this.BIMObjects.indexOf(i) === -1) {
-        this.BIMObjects.push(i);
+    if (typeof index === "undefined") {
+      input.forEach(i => {
+        if (this.BIMObjects.indexOf(i) === -1) {
+          this.BIMObjects.push(i);
+        }
+      });
+    } else {
+      for (let i = 0; i < input.length; i++) {
+        const element = input[i];
+        if (!this.BIMObjects.contains(element)) {
+          this.BIMObjects.insert(index + i, [element]);
+        }
       }
-    });
+    }
   }
 
   removeItems(input) {
@@ -89,6 +100,12 @@ export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
     return removedItems;
   }
 
+  removeItemByIndex(index) {
+    let toBeRemove = this.BIMObjects[index]
+    this.BIMObjects.splice(index, 1);
+    return toBeRemove;
+  }
+
   arrayOfId() {
     let t = [];
     for (let i = 0; i < this.BIMObjects.length; i++) {
@@ -100,6 +117,11 @@ export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
 
   isolate() {
     getViewer().isolateById(this.arrayOfId());
+  }
+
+  setCurrentValue(_value) {
+    this.currentValue.set(_value)
+    this.populateTimeSeries();
   }
 
 

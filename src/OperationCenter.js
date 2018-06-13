@@ -20,26 +20,26 @@ let getViewer = function() {
   return globalType.v;
 }
 
-import {
-  BasicConfigurationNode,
-  ConfigurationNode,
-  ConfigurationRoot
-} from "./ConfigurationNode"
+import ConfigurationNode from "./ConfigurationNode"
 import Forest from "./Forest"
 import SpinalBIMGroupOC from "./SpinalBIMGroupOC"
 import SpinalBIMObjectOC from "./SpinalBIMObjectOC"
+import RelForestOptions from "./RelForestOptions"
+import Options from "./Options"
 
 
 
 
 
 class OperationCenter extends globalType.Model {
-  constructor() {
+  constructor(name = "OperationCenter") {
     super();
-    this.add_attr({
-      zoneForest: new Ptr(new Forest()),
-      networkForest: new Ptr(new Forest())
-    });
+    if (FileSystem._sig_server) {
+      this.add_attr({
+        relForestOptions: new Ptr(new RelForestOptions()),
+        networkForest: new Ptr(new Forest())
+      });
+    }
   }
 }
 
@@ -47,12 +47,12 @@ class OperationCenter extends globalType.Model {
 
 export {
   OperationCenter,
-  BasicConfigurationNode,
   ConfigurationNode,
-  ConfigurationRoot,
   Forest,
   SpinalBIMGroupOC,
-  SpinalBIMObjectOC
+  SpinalBIMObjectOC,
+  RelForestOptions,
+  Options
 }
 
 
