@@ -20,13 +20,31 @@ let getViewer = function() {
   return globalType.v;
 }
 
-import ConfigurationNode from "./ConfigurationNode"
+
+
+
+import RelForestOptions from "./RelForestOptions"
+import RelOperationCenter from "./RelOperationCenter"
+import RelZoneAggregates from "./RelZoneAggregates"
+import RelZoneAggregatesList from "./RelZoneAggregatesList"
 import Forest from "./Forest"
+import NetworkList from "./NetworkList"
+import DeviceForest from "./DeviceForest"
+import ZoneForest from "./ZoneForest"
+import SpinalNode from "./SpinalNode"
+import DeviceNode from "./DeviceNode"
+import ZoneNode from "./ZoneNode"
+import OperationCenterObject from "./OperationCenterObject"
+import Device from "./Device"
+import ZoneList from "./ZoneList"
+
+import Zone from "./Zone"
 import SpinalBIMGroupOC from "./SpinalBIMGroupOC"
 import SpinalBIMObjectOC from "./SpinalBIMObjectOC"
-import RelForestOptions from "./RelForestOptions"
 import Options from "./Options"
-
+import Endpoint from "./Endpoint"
+import EndpointGroup from "./EndpointGroup"
+import PanelManager from "./PanelManager"
 
 
 
@@ -35,9 +53,24 @@ class OperationCenter extends globalType.Model {
   constructor(name = "OperationCenter") {
     super();
     if (FileSystem._sig_server) {
+      let options = new Options()
+
+      options.add_attr({
+        endpointNameId: 0,
+        equipementNameId: 0,
+        endpointGroupNameId: 0
+      })
+      let zoneForest = new ZoneForest();
+      // let deviceForest = new DeviceForest();
+      let networkList = new NetworkList();
       this.add_attr({
-        relForestOptions: new Ptr(new RelForestOptions()),
-        networkForest: new Ptr(new Forest())
+        relForestOptionsZone: new Ptr(new RelForestOptions("zoneForest",
+          zoneForest)),
+        networkList: new Ptr(networkList),
+        relZoneAggregatesList: new Ptr(new RelZoneAggregatesList()),
+        zoneList: new Ptr(new ZoneList()),
+        deviceList: new Ptr(new Lst()),
+        options: options
       });
     }
   }
@@ -47,20 +80,27 @@ class OperationCenter extends globalType.Model {
 
 export {
   OperationCenter,
-  ConfigurationNode,
+  RelOperationCenter,
+  RelForestOptions,
+  RelZoneAggregates,
+  RelZoneAggregatesList,
   Forest,
+  NetworkList,
+  DeviceForest,
+  ZoneForest,
+  SpinalNode,
+  DeviceNode,
+  ZoneNode,
+  OperationCenterObject,
+  Device,
+  ZoneList,
+  Zone,
   SpinalBIMGroupOC,
   SpinalBIMObjectOC,
-  RelForestOptions,
-  Options
+  Options,
+  Endpoint,
+  EndpointGroup,
+  PanelManager
 }
 
-
-// exports.OperationCenter = OperationCenter;
-// exports.BasicConfigurationNode = BasicConfigurationNode;
-// exports.ConfigurationNode = ConfigurationNode;
-// exports.ConfigurationRoot = ConfigurationRoot;
-// exports.Forest = Forest;
-// exports.SpinalBIMGroupOC = SpinalBIMGroupOC;
-// exports.SpinalBIMObjectOC = SpinalBIMObjectOC;
 spinalCore.register_models([OperationCenter])

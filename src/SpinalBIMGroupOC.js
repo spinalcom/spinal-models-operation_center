@@ -10,18 +10,44 @@ let getViewer = function() {
 }
 
 export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
-  constructor(_parent, name = "SpinalBIMGroupOC") {
+  constructor(name = "SpinalBIMGroupOC") {
     super();
     if (FileSystem._sig_server) {
       this.add_attr({
-        id: SpinalBIMGroupOC.SpinalBIMGroupOCId++,
+        id: this.guid(),
         currentValue: 0,
         timeSeries: [],
-        parent: _parent,
         active: false
       });
       this.display.set(true);
     }
+  }
+
+  guid() {
+    return (
+      this.constructor.name +
+      "-" +
+      this.s4() +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      this.s4() +
+      this.s4() +
+      "-" +
+      Date.now().toString(16)
+    );
+  }
+
+  s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
   }
 
   populateTimeSeries() {
@@ -126,6 +152,5 @@ export default class SpinalBIMGroupOC extends BIMForge.SpinalBIMGroupForge {
 
 
 }
-SpinalBIMGroupOC.SpinalBIMGroupOCId = 0
 
 spinalCore.register_models([SpinalBIMGroupOC])

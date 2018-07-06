@@ -1,21 +1,25 @@
+import OperationCenterObject from "./OperationCenterObject";
+import SpinalNode from "./SpinalNode";
+
 const spinalCore = require("spinal-core-connectorjs");
 const globalType = typeof window === "undefined" ? global : window;
-import ConfigurationNode from "./ConfigurationNode"
 let getViewer = function() {
   return globalType.v;
 }
 export default class Forest extends globalType.Model {
   constructor(_options) {
-    if (typeof _options === "undefined") _options = new globalType.Model()
+    if (typeof _options === "undefined") _options = new globalType.Ptr(0)
     super();
     if (FileSystem._sig_server) {
       this.add_attr({
         list: new Lst(),
         childNameId: 0,
-        coloringType: 0,
         relOptions: _options
       });
     }
+  }
+  setOptions(_options) {
+    this.relOptions.set(_options);
   }
 
   incrementChildNameId() {
@@ -23,13 +27,15 @@ export default class Forest extends globalType.Model {
     return this.childNameId.get();
   }
 
-  addTree(title) {
-    var tree = new ConfigurationNode(0, "Zone", this.relOptions);
-    let id = this.incrementChildNameId()
-    tree.setTitle(title + " " + id.toString());
-
+  addTree(_name) {
+    let operationCenterObject = new OperationCenterObject()
+    operationCenterObject.setName(_name + " " + this.incrementChildNameId()
+      .toString());
+    var tree = new SpinalNode(0, operationCenterObject, this.relOptions);
     this.list.push(tree);
   }
+
+
 
   removeTree(root) {
     let i = this.list.indexOf(root);
@@ -40,66 +46,6 @@ export default class Forest extends globalType.Model {
     return i;
   }
 
-  getEquipements() {
-    let equipementsArray = [];
-    for (let i = 0; i < this.list.length; i++) {
-      const tree = this.list[i];
-      equipementsArray = equipementsArray.concat(tree.getEquipements());
-    }
-    return equipementsArray;
-  }
-
-  getAllBIMGroups() {
-    let res = [];
-    for (let i = 0; i < this.list.length; i++) {
-      const tree = this.list[i];
-      res = res.concat(tree.getAllBIMGroups());
-    }
-    return res;
-  }
-
-  getAllBIMObjectsIds() {
-    let res = []
-    let BIMGroups = this.getAllBIMGroups();
-    for (let index = 0; index < BIMGroups.length; index++) {
-      const element = BIMGroups[index];
-      res = res.concat(element.arrayOfId())
-    }
-    return res;
-  }
-
-  restoreColorMaterial() {
-    if (this.coloringType === 1) getViewer().clearThemingColors()
-    else {
-      getViewer().restoreColorMaterial(this.getAllBIMObjectsIds())
-    }
-  }
-
-  refreshAllColors() {
-    let BIMGroups = this.getAllBIMGroups();
-    for (let index = 0; index < BIMGroups.length; index++) {
-      const element = BIMGroups[index];
-      if (element.currentValue.get() !== 0 && element.display.get()) {
-        element.refreshColors(this.coloringType);
-      }
-    }
-  }
-
-  activateAllBIMGroups() {
-    let t = this.getAllBIMGroups()
-    for (let index = 0; index < t.length; index++) {
-      const element = t[index];
-      element.active.set(true);
-    }
-  }
-
-  disactivateAllBIMGroups() {
-    let t = this.getAllBIMGroups()
-    for (let index = 0; index < t.length; index++) {
-      const element = t[index];
-      element.active.set(false);
-    }
-  }
 }
 
 spinalCore.register_models([Forest])
