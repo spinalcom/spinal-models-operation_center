@@ -61,18 +61,20 @@ export default class ZoneForest extends Forest {
     return equipementsArray;
   }
 
-  getAllBIMGroups() {
+  async getAllBIMGroups() {
     let res = [];
     for (let i = 0; i < this.list.length; i++) {
       const tree = this.list[i];
-      res = res.concat(tree.getAllBIMGroups());
+      let tmp = await tree.getAllBIMGroups()
+      // if (tmp != null)
+      res = res.concat(tmp);
     }
     return res;
   }
 
-  getAllBIMObjectsIds() {
+  async getAllBIMObjectsIds() {
     let res = []
-    let BIMGroups = this.getAllBIMGroups();
+    let BIMGroups = await this.getAllBIMGroups();
     for (let index = 0; index < BIMGroups.length; index++) {
       const element = BIMGroups[index];
       res = res.concat(element.arrayOfId())
@@ -87,8 +89,8 @@ export default class ZoneForest extends Forest {
     }
   }
 
-  refreshAllColors() {
-    let BIMGroups = this.getAllBIMGroups();
+  async refreshAllColors() {
+    let BIMGroups = await this.getAllBIMGroups();
     for (let index = 0; index < BIMGroups.length; index++) {
       const element = BIMGroups[index];
       if (element.currentValue.get() !== 0 && element.display.get()) {
@@ -97,16 +99,16 @@ export default class ZoneForest extends Forest {
     }
   }
 
-  activateAllBIMGroups() {
-    let t = this.getAllBIMGroups()
+  async activateAllBIMGroups() {
+    let t = await this.getAllBIMGroups()
     for (let index = 0; index < t.length; index++) {
       const element = t[index];
       element.active.set(true);
     }
   }
 
-  disactivateAllBIMGroups() {
-    let t = this.getAllBIMGroups()
+  async disactivateAllBIMGroups() {
+    let t = await this.getAllBIMGroups()
     for (let index = 0; index < t.length; index++) {
       const element = t[index];
       element.active.set(false);

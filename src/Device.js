@@ -4,6 +4,8 @@ import OperationCenterObject from "./OperationCenterObject"
 import Endpoint from "./Endpoint"
 import EndpointGroup from "./EndpointGroup"
 
+import RelEquipementDevice from "./RelEquipementDevice"
+import RelDeviceEquipement from "./RelDeviceEquipement"
 export default class Device extends OperationCenterObject {
   constructor(_protocolType, _id, name = "Device") {
     if (typeof _id === "undefined")
@@ -18,7 +20,8 @@ export default class Device extends OperationCenterObject {
         deviceType: new Choice(0, ["Sensor", "Router", "Actuator"]),
         endpointGroupsPtrs: new Lst([new Ptr(defaultEndpointGroup)]),
         defaultMeasurement: new Choice(0, defaultEndpointGroup.list.get()),
-        relatedEquipement: new Ptr(0)
+        relEquipementDevice: new Ptr(new RelEquipementDevice(0, this)),
+        relDeviceEquipement: new Ptr(new RelDeviceEquipement(0))
       });
       this.protocolType.set(_protocolType || "SNMP");
       defaultEndpointGroup.createEndpoint()

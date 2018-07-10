@@ -44,6 +44,34 @@ export default class OperationCenterObject extends globalType.Model {
   setName(_name) {
     this.name.set(_name)
   }
+
+  // relationExists(_relation) {
+  //   for (let index = 0; index < this.attr_attribute_names.length; index++) {
+  //     const attribute = this.attr_attribute_names[index];
+  //     if (attribute === _relation)
+  //     return 
+  //   }
+  // }
+
+  addRelation(_relation, _elements) {
+    let attributeIndex = this._attribute_names.indexOf(_relation)
+    if (attributeIndex === -1) {
+      this.add_attr({
+        [_relation]: new Ptr(new Lst())
+      })
+    }
+    if (Array.isArray(_elements))
+      for (let index = 0; index < _elements.length; index++) {
+        const element = _elements[index];
+        this[_relation].load(rel => {
+          rel.push(element)
+        })
+      }
+    else
+      this[_relation].load(rel => {
+        rel.push(_elements)
+      })
+  }
 }
 
 spinalCore.register_models([OperationCenterObject])

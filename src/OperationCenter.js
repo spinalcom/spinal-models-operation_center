@@ -47,6 +47,10 @@ import EndpointGroup from "./EndpointGroup"
 import PanelManager from "./PanelManager"
 
 
+import RelEquipementDevice from "./RelEquipementDevice"
+import RelDeviceEquipement from "./RelDeviceEquipement"
+
+
 
 
 class OperationCenter extends globalType.Model {
@@ -100,7 +104,9 @@ export {
   Options,
   Endpoint,
   EndpointGroup,
-  PanelManager
+  PanelManager,
+  RelEquipementDevice,
+  RelDeviceEquipement
 }
 
 spinalCore.register_models([OperationCenter])
