@@ -8,7 +8,13 @@ export default class Endpoint extends globalType.Model {
       this.add_attr({
         name: "Endpoint " + this.incrementNameId(),
         id: this.guid(),
-        dataType: new Choice(0, ["Temperature", "Humidity"]),
+        dataNature: new Choice(0, ["Temperature", "Humidity"]), // I dont know if we keep that
+        dataType: new Choice(0, ["Null", "Boolean", "Unsigned",
+          "Unsigned8", "Unsigned16", "Unsigned32", "Integer",
+          "Integer16", "Real", "Double", "OctetString",
+          "CharacterString", "BitString", "Enumerated", "Date",
+          "Time", "Array"
+        ]), // I dont know if we keep that
         currentValue: 0,
         path: "",
         min: 0,

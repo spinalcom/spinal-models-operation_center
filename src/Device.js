@@ -6,25 +6,54 @@ import EndpointGroup from "./EndpointGroup"
 
 import RelEquipementDevice from "./RelEquipementDevice"
 import RelDeviceEquipement from "./RelDeviceEquipement"
-export default class Device extends OperationCenterObject {
-  constructor(_protocolType, _id, name = "Device") {
+
+/**
+ *
+ *
+ * @class Device
+ * @extends {OperationCenterObject}
+ */
+class Device extends OperationCenterObject {
+  /**
+   *Creates an instance of Device.
+   * @param {string} protocolType
+   * @param {number} id
+   * @param {string} ipAddress
+   * @param {string} deviceType
+   * @param {EndpointGroup} defaultEndpointGroup
+   * @param {Endpoint} defaultMeasurement
+   * @param {string} [name="Device"]
+   * @memberof Device
+   */
+  constructor(_protocolType, _id, _ipAddress, _deviceType,
+    _defaultEndpointGroup,
+    _defaultMeasurement, name = "Device") {
     if (typeof _id === "undefined")
       super();
     else
       super(_id);
     if (FileSystem._sig_server) {
-      let defaultEndpointGroup = new EndpointGroup(this)
+      let defaultEndpointGroup = null
+      if (typeof _defaultEndpointGroup === "undefined")
+        defaultEndpointGroup = new EndpointGroup(this)
+      else
+        defaultEndpointGroup = _defaultEndpointGroup
       this.add_attr({
         protocolType: new Choice(0, ["SNMP", "BACnet"]),
-        ipAddress: "127.0.0.1",
+        ipAddress: _ipAddress || "127.0.0.1",
         deviceType: new Choice(0, ["Sensor", "Router", "Actuator"]),
         endpointGroupsPtrs: new Lst([new Ptr(defaultEndpointGroup)]),
         defaultMeasurement: new Choice(0, defaultEndpointGroup.list.get()),
         relEquipementDevice: new Ptr(new RelEquipementDevice(0, this)),
         relDeviceEquipement: new Ptr(new RelDeviceEquipement(0))
       });
-      this.protocolType.set(_protocolType || "SNMP");
-      defaultEndpointGroup.createEndpoint()
+      if (typeof _protocolType !== "undefined")
+        this.protocolType.set(_protocolType);
+      if (typeof _deviceType !== "undefined")
+        this.deviceType.set(_deviceType);
+      if (typeof _defaultMeasurement !== "undefined")
+        this.defaultMeasurement.set(_defaultMeasurement);
+      // defaultEndpointGroup.createEndpoint()
     }
   }
 
@@ -54,5 +83,5 @@ export default class Device extends OperationCenterObject {
   }
 
 }
-
+export default Device;
 spinalCore.register_models([Device])

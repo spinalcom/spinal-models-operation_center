@@ -6,11 +6,38 @@ export default class Options extends globalType.Model {
     super();
     if (FileSystem._sig_server) {
       this.add_attr({
-        id: Options.OptionsId++
+        id: this.guid()
       });
     }
   }
+  guid() {
+    return (
+      this.constructor.name +
+      "-" +
+      this.s4() +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      "-" +
+      this.s4() +
+      this.s4() +
+      this.s4() +
+      "-" +
+      Date.now().toString(16)
+    );
+  }
+
+  s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
 }
-Options.OptionsId = 0;
+
+
 
 spinalCore.register_models([Options])
