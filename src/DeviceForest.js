@@ -21,7 +21,7 @@ export default class DeviceForest extends Forest {
     return this.deviceNameId.get();
   }
 
-  addTree(_protocolType) {
+  addDevice(_protocolType) {
     let device = new Device(_protocolType)
     device.setName(_protocolType + "-device" + " " + this.incrementChildNameId()
       .toString());
@@ -30,9 +30,9 @@ export default class DeviceForest extends Forest {
   }
 
 
-  addDevice(_protocolType) {
-    this.list.push(new Device(_protocolType, this.incrementDeviceNameId()))
-  }
+  // addDevice(_protocolType) {
+  //   this.list.push(new Device(_protocolType, this.incrementDeviceNameId()))
+  // }
 }
 
 spinalCore.register_models([DeviceForest])
